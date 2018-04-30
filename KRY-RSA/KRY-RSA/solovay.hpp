@@ -23,7 +23,7 @@ class Solovay{
 public:
     int length;
     Solovay(int length);
-    tRandoms getPrimes();
+    tRandoms getPrimes(gmp_randstate_t rstate);
     
 private:
     void getRandom(mpz_t p, mpz_t q, gmp_randstate_t rstate);

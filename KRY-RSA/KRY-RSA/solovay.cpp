@@ -39,8 +39,13 @@ void Solovay::getRandom(mpz_t p, mpz_t q, gmp_randstate_t rstate){
     mpz_setbit(q, 0);
 
     // Msb
-    mpz_setbit(p, opLength-1);
-    mpz_setbit(q, opLength-1);
+    if (this->length >= 10){
+        mpz_setbit(p, opLength-1);
+        mpz_setbit(q, opLength-1);
+    }
+   
+    // mpz_setbit(p, opLength-2);
+    // mpz_setbit(q, opLength-2);
 }
 
 
@@ -204,18 +209,14 @@ int Solovay::jacob(mpz_t a_in, mpz_t n_in)
 
 
 
-tRandoms Solovay::getPrimes(){
+tRandoms Solovay::getPrimes(gmp_randstate_t rstate){
     // init long vars
-    mpz_t p;
-    mpz_init(p);
-    mpz_t q;
-    mpz_init(q);
+    mpz_t p; mpz_init(p);
+    mpz_t q; mpz_init(q);
+    double helper;
+
     
-    // init rand
-    unsigned long seed;
-    gmp_randstate_t rstate;
-    gmp_randinit_mt(rstate);
-    gmp_randseed_ui(rstate, seed);
+    
     
     // prime result
     bool myPrime = false;
@@ -224,33 +225,68 @@ tRandoms Solovay::getPrimes(){
 
     /* Iter until you get prime p */
     while (myPrime == false){
-        gmp_printf ("%s input %Zd\n", "here", p);
+        // gmp_printf ("%s input %Zd\n", "here", p);
         myPrime = this->testPrime(p);
+        /*
+        helper = pow(2, (this->length/2) - 0.5);
+        cout << "helper1: "<<helper<<"\n";
+        cout << "myprime: "<<myPrime<<"\n";
+        if (myPrime && mpz_cmp_ui(p, floor(helper)) >= 0){
+            helper = pow(2, (this->length/2));
+            cout << "helper2: "<<helper<<"\n";
+            if (mpz_cmp_ui(p, ceil(helper)) < 0){
+                myPrime = true;
+            }else{
+                myPrime = false;
+            }
+            
+        } else {
+            myPrime = false;
+        }
+        */
         oficPrime = mpz_probab_prime_p(p, ITERS);
-        cout  << ". my: " << myPrime << ", ofic: " << oficPrime << "\n";
+        // cout  << ". my: " << myPrime << ", ofic: " << oficPrime << "\n";
         if ((myPrime > 0 && oficPrime == 0) || (myPrime == 0 && oficPrime > 0)){
             cout << "ERROR KAMO";
             exit(1);
         }
         
         if (myPrime){
-            cout << "has it!!";
+            // cout << "has it!!";
             // exit(0);
         }else{
             // add 2 because random numb is odd and prime number cannot be even
             mpz_add_ui(p, p, 2);
         }
-        cout << "----------------------\n";
+        // cout << "----------------------\n";
         
     }
     
     myPrime = false;
     /* Iter until you get prime q */
     while (myPrime == false){
-        gmp_printf ("%s input %Zd\n", "here", q);
+        // gmp_printf ("%s input %Zd\n", "here", q);
         myPrime = this->testPrime(q);
+        /*
+        helper = pow(2, (this->length/2) - 0.5);
+        cout << "helper1: "<<helper<<"\n";
+        cout << "myprime: "<<myPrime<<"\n";
+        if (myPrime && mpz_cmp_ui(q, floor(helper)) >= 0){
+            helper = pow(2, (this->length/2));
+            cout << "helper2: "<<helper<<"\n";
+
+            if (mpz_cmp_ui(q, ceil(helper)) < 0){
+                myPrime = true;
+            }else{
+                myPrime = false;
+            }
+            
+        } else {
+            myPrime = false;
+        }
+        */
         oficPrime = mpz_probab_prime_p(q, ITERS);
-        cout  << ". my: " << myPrime << ", ofic: " << oficPrime << "\n";
+        // cout  << ". my: " << myPrime << ", ofic: " << oficPrime << "\n";
         if ((myPrime > 0 && oficPrime == 0) || (myPrime == 0 && oficPrime > 0)){
             cout << "ERROR KAMO";
             exit(1);
@@ -262,12 +298,15 @@ tRandoms Solovay::getPrimes(){
         }else{
             // add 2 because random numb is odd and prime number cannot be even
             mpz_add_ui(q, q, 2);
+            if (mpz_cmp(p,q) == 0){
+                mpz_add_ui(q, q, 2);
+            }
         }
-        cout << "----------------------\n";
+        // cout << "----------------------\n";
     }
     
-    gmp_printf ("%s is an mpz %Zd\n", "here", q);
-    gmp_printf ("%s is an mpz %Zd\n", "here", p);
+    // gmp_printf ("%s is an mpz %Zd\n", "here", p);
+    // gmp_printf ("%s is an mpz %Zd\n", "here", q);
     
     tRandoms randoms;
     mpz_init(randoms.p);
