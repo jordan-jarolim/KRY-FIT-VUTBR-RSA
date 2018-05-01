@@ -43,9 +43,6 @@ void Solovay::getRandom(mpz_t p, mpz_t q, gmp_randstate_t rstate){
         mpz_setbit(p, opLength-1);
         mpz_setbit(q, opLength-1);
     }
-   
-    // mpz_setbit(p, opLength-2);
-    // mpz_setbit(q, opLength-2);
 }
 
 
@@ -206,18 +203,12 @@ int Solovay::jacob(mpz_t a_in, mpz_t n_in)
     return 0;
 }
 
-
-
-
 tRandoms Solovay::getPrimes(gmp_randstate_t rstate){
     // init long vars
     mpz_t p; mpz_init(p);
     mpz_t q; mpz_init(q);
     double helper;
 
-    
-    
-    
     // prime result
     bool myPrime = false;
     bool oficPrime;
@@ -225,252 +216,43 @@ tRandoms Solovay::getPrimes(gmp_randstate_t rstate){
 
     /* Iter until you get prime p */
     while (myPrime == false){
-        // gmp_printf ("%s input %Zd\n", "here", p);
         myPrime = this->testPrime(p);
-        /*
-        helper = pow(2, (this->length/2) - 0.5);
-        cout << "helper1: "<<helper<<"\n";
-        cout << "myprime: "<<myPrime<<"\n";
-        if (myPrime && mpz_cmp_ui(p, floor(helper)) >= 0){
-            helper = pow(2, (this->length/2));
-            cout << "helper2: "<<helper<<"\n";
-            if (mpz_cmp_ui(p, ceil(helper)) < 0){
-                myPrime = true;
-            }else{
-                myPrime = false;
-            }
-            
-        } else {
-            myPrime = false;
-        }
-        */
         oficPrime = mpz_probab_prime_p(p, ITERS);
-        // cout  << ". my: " << myPrime << ", ofic: " << oficPrime << "\n";
         if ((myPrime > 0 && oficPrime == 0) || (myPrime == 0 && oficPrime > 0)){
             cout << "ERROR KAMO";
             exit(1);
         }
-        
-        if (myPrime){
-            // cout << "has it!!";
-            // exit(0);
-        }else{
+        if (!myPrime){
             // add 2 because random numb is odd and prime number cannot be even
             mpz_add_ui(p, p, 2);
         }
-        // cout << "----------------------\n";
         
     }
     
     myPrime = false;
     /* Iter until you get prime q */
     while (myPrime == false){
-        // gmp_printf ("%s input %Zd\n", "here", q);
         myPrime = this->testPrime(q);
-        /*
-        helper = pow(2, (this->length/2) - 0.5);
-        cout << "helper1: "<<helper<<"\n";
-        cout << "myprime: "<<myPrime<<"\n";
-        if (myPrime && mpz_cmp_ui(q, floor(helper)) >= 0){
-            helper = pow(2, (this->length/2));
-            cout << "helper2: "<<helper<<"\n";
-
-            if (mpz_cmp_ui(q, ceil(helper)) < 0){
-                myPrime = true;
-            }else{
-                myPrime = false;
-            }
-            
-        } else {
-            myPrime = false;
-        }
-        */
         oficPrime = mpz_probab_prime_p(q, ITERS);
-        // cout  << ". my: " << myPrime << ", ofic: " << oficPrime << "\n";
         if ((myPrime > 0 && oficPrime == 0) || (myPrime == 0 && oficPrime > 0)){
             cout << "ERROR KAMO";
             exit(1);
         }
         
-        if (myPrime){
-            cout << "has it!!";
-            // exit(0);
-        }else{
+        if (!myPrime){
             // add 2 because random numb is odd and prime number cannot be even
             mpz_add_ui(q, q, 2);
             if (mpz_cmp(p,q) == 0){
                 mpz_add_ui(q, q, 2);
             }
         }
-        // cout << "----------------------\n";
     }
-    
-    // gmp_printf ("%s is an mpz %Zd\n", "here", p);
-    // gmp_printf ("%s is an mpz %Zd\n", "here", q);
     
     tRandoms randoms;
     mpz_init(randoms.p);
     mpz_init(randoms.q);
     mpz_set(randoms.p, p);
     mpz_set(randoms.q, q);
-    
     return randoms;
-    
 };
-
-
-
-/*
- bool Solovay::solovoyCombined(ll p, int iteration)
- {
- mpz_t a;
- mpz_init(a);
- mpz_t jacobVar; mpz_init(jacobVar);
- 
- 
- if (p < 2)
- return false;
- if (p != 2 && p % 2 == 0)
- return false;
- for (int i = 0; i < iteration; i++)
- {
- ll kokos = rand();
- ll aInt = kokos % (p - 1) + 1;
- ll jacobian = (p + calculateJacobian(aInt, p)) % p;
- ll mod = modulo(aInt, (p - 1) / 2, p);
- 
- mpz_t leftCongruent;
- mpz_init(leftCongruent);
- // right side
- mpz_t rightCongruent;
- mpz_init(rightCongruent);
- // helper var
- mpz_t helper;
- mpz_init(helper);
- 
- mpz_t a;
- mpz_init_set_ui(a, kokos);
- 
- mpz_t prime;
- mpz_init_set_ui(prime, p);
- 
- mpz_sub_ui(helper, prime, 1);
- gmp_printf ("%s is my (p-1) %Zd\n", "here", helper);
- cout << "true (p-1) " << (p-1) << "\n";
- 
- 
- mpz_mod(a, a, helper);
- gmp_printf ("%s is my rand %(p-1) %Zd\n", "here", a);
- cout << "true (p-1) " << kokos % (p-1) << "\n";
- 
- mpz_add_ui(a, a, 1);
- 
- 
- gmp_printf ("%s is my random %Zd\n", "here", a);
- cout << "true random " << aInt << "\n";
- 
- 
- 
- mpz_t x; mpz_init_set_ui(x, 1);
- mpz_t y; mpz_init_set(y, a);
- mpz_t exponent; mpz_init(exponent);
- mpz_sub_ui(exponent, prime, 1);
- mpz_div_ui(exponent, exponent, 2);
- 
- 
- while(mpz_cmp_ui(exponent, 0) > 0)
- {
- mpz_mod_ui(helper, exponent, 2);
- if (mpz_cmp_ui(helper, 1) == 0){
- mpz_mul(helper, x, y);
- mpz_mod(x, helper, prime);
- }
- mpz_mul(helper, y, y);
- mpz_mod(y, helper, prime);
- mpz_div_ui(exponent, exponent, 2);
- }
- 
- mpz_mod(leftCongruent, x, prime);
- gmp_printf ("%s is my mod %Zd\n", "here", leftCongruent);
- 
- 
- cout << "other mod " << mod << "\n";
- fflush(stdout);
- 
- 
- if (mpz_cmp_ui(leftCongruent, mod) != 0){
- cout << "ERROR";
- exit(1);
- }
- 
- 
- int pureJac = calculateJacobian(aInt, p);
- int myJac = this->jacob(a, prime);
- cout << "pure original jacob: " << pureJac << "\n";
- cout << "my jacob: "<< myJac << "\n";
- 
- if (pureJac != myJac){
- cout << "jiny jacob!!!\n";
- exit(1);
- }
- 
- int extendedJacobOrig = (p + calculateJacobian(aInt, p));
- 
- cout << "soucet orig: " << extendedJacobOrig << "\n";
- cout << "p v souctu: "<<p<<"\n";
- 
- 
- if (myJac < 0){
- mpz_set_ui(jacobVar, -myJac);
- gmp_printf ("my jac inverse: %Zd\n", jacobVar);
- 
- mpz_sub(rightCongruent, prime, jacobVar);
- }else{
- cout << " >= 0\n";
- mpz_add_ui(rightCongruent, prime, myJac);
- }
- 
- gmp_printf ("%s soucet my: %Zd\n", "here", rightCongruent);
- gmp_printf ("prime v souctu: %Zd\n", prime);
- 
- 
- if (mpz_cmp_ui(rightCongruent, extendedJacobOrig) != 0){
- cout << "++++ ERROR";
- exit(1);
- }
- 
- 
- mpz_mod(rightCongruent, rightCongruent, prime);
- extendedJacobOrig = extendedJacobOrig % p;
- 
- cout << "extended Orig: "<<extendedJacobOrig<<"\n";
- gmp_printf ("%s extended my %Zd\n", "here", rightCongruent);
- 
- if (mpz_cmp_ui(rightCongruent, extendedJacobOrig) != 0){
- cout << "\n mod ERROR\n";
- exit(1);
- }
- 
- cout << p << ". je to ok\n";
- 
- bool origLast = !jacobian || mod != jacobian;
- 
- bool myLast = mpz_cmp_ui(rightCongruent, 0) == 0 || mpz_cmp(rightCongruent, leftCongruent) != 0;
- 
- if (origLast != myLast){
- cout << "WTFFF";
- exit(1);
- }
- 
- if (!jacobian || mod != jacobian)
- {
- return false;
- }
- }
- 
- return true;
- }
- */
-
-
 

@@ -16,5 +16,6 @@
 class Rsa{
 public:
     void getN(mpz_t N, mpz_t p, mpz_t q);
+    void getPhi(mpz_t phi, mpz_t p, mpz_t q);
 };
 #endif /* rsa_hpp */
