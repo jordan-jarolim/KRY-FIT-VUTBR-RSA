@@ -27,7 +27,6 @@ Solovay::Solovay(int length):length(length){}
  * Random number generator
  */
 void Solovay::getRandom(mpz_t p, mpz_t q, gmp_randstate_t rstate){
-    // https://crypto.stackexchange.com/questions/20474/maximum-length-in-bits-of-the-product-n-pq
     int opLength = this->length / 2;
     
     // generate p, q

@@ -18,9 +18,28 @@
 #include "solovay.hpp"
 #include "rsa.hpp"
 
+#define GENERATE 0
+#define CYPHER 1
+#define DECYPHER 2
+
 using namespace std;
 
-// https://stackoverflow.com/questions/322938/recommended-way-to-initialize-srand?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
+/**
+ * Structure holding initial settings and params
+ */
+typedef struct {
+    int length;
+    int type;
+    mpz_t publicExponent;
+    mpz_t N;
+    mpz_t message;
+    mpz_t privateD;
+    mpz_t cyphered;
+} tParams;
+
+/** Helper method for random seed
+ * https://stackoverflow.com/questions/322938/recommended-way-to-initialize-srand?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
+ */
 unsigned long mix(unsigned long a, unsigned long b, unsigned long c)
 {
     a=a-b;  a=a-c;  a=a^(c >> 13);
@@ -38,26 +57,29 @@ unsigned long mix(unsigned long a, unsigned long b, unsigned long c)
 /**
  * Parse args
  */
-int getOptions(int argc, char *argv[]) {
-    int c;
-    int length = 1024;
-    opterr = 0;
-    while ((c = getopt(argc, argv, "g:")) != -1) {
-        switch (c) {
-            case 'g':
-                length = atoi(optarg);
-                break;
-            default:
-                cerr << "unknown option\n";
-                exit(1);
-        }
+tParams getOptions(int argc, char *argv[]) {
+    tParams params;
+    mpz_init(params.publicExponent); mpz_init(params.N); mpz_init(params.message);
+    mpz_init(params.privateD); mpz_init(params.cyphered);
+    
+    if (!strcmp(argv[1], "-g")){
+        params.length = atoi(argv[2]);
+        params.type = GENERATE;
     }
-    return length;
+    if (!strcmp(argv[1], "-e")){
+        mpz_set_str(params.publicExponent, argv[2], 0);
+        mpz_set_str(params.N, argv[3], 0);
+        mpz_set_str(params.message, argv[4], 0);
+        params.type = CYPHER;
+    }
+    return params;
 }
 
 
-int main(int argc, char ** argv) {
-    int keyLength = getOptions(argc, argv);
+/**
+ * handle generating RSA params
+ */
+void generate(tParams params){
     /* Init rand */
     unsigned long seed = mix(clock(), time(NULL), getpid());
     gmp_randstate_t rstate;
@@ -65,30 +87,66 @@ int main(int argc, char ** argv) {
     gmp_randseed_ui(rstate, seed);
     
     /* Init SolovayStrassen class to get primes */
-    Solovay* solovay = new Solovay(keyLength);
+    Solovay* solovay = new Solovay(params.length);
     Rsa* rsa = new Rsa();
     tRandoms randoms;
     mpz_t N; mpz_init(N);
     mpz_t phi; mpz_init(phi);
+    mpz_t publicExponent; mpz_init(publicExponent);
+    mpz_t privateD; mpz_init(privateD);
+    
     
     /* Generate primes, get N and check its length */
     char* str = mpz_get_str(NULL, 2, N);
-    while((unsigned)strlen(str) != keyLength){
+    while((unsigned)strlen(str) != params.length){
         randoms = solovay->getPrimes(rstate);
         rsa->getN(N, randoms.p, randoms.q);
         str = mpz_get_str(NULL, 2, N);
-        cout << str << "\n";
-        cout <<(unsigned)strlen(str)<<"\n";
-        
     }
-    cout << str << "\n";
-    cout <<(unsigned)strlen(str)<<"\n";
     
+    /* Generate othe parameters */
     rsa->getPhi(phi, randoms.p, randoms.q);
+    rsa->getPublicExponent(publicExponent, phi, rstate);
+    rsa->extendedEuclid(privateD, publicExponent, phi);
+    
     gmp_printf ("p: %Zd\n", randoms.p);
     gmp_printf ("q: %Zd\n", randoms.q);
     gmp_printf ("N: %Zd\n", N);
     gmp_printf ("Phi:  %Zd\n", phi);
+    gmp_printf ("public exp:  %Zd\n", publicExponent);
+    gmp_printf ("private D:  %Zd\n", privateD);
+    
+    gmp_printf("0x%Zx 0x%Zx 0x%Zx 0x%Zx 0x%Zx",randoms.p, randoms.q, N, publicExponent, privateD);
+}
 
+void cypher(tParams params){
+    mpz_t cyphered; mpz_init(cyphered);
+    Rsa* rsa = new Rsa();
+    rsa->cypher(cyphered, params.message, params.publicExponent, params.N);
+    gmp_printf("0x%Zx",cyphered);
+}
+
+void decypher(tParams params){
+}
+
+void help(){
+}
+
+int main(int argc, char ** argv) {
+    tParams params = getOptions(argc, argv);
+    switch (params.type) {
+        case GENERATE:
+            generate(params);
+            break;
+        case CYPHER:
+            cypher(params);
+            break;
+        case DECYPHER:
+            decypher(params);
+            break;
+        default:
+            help();
+            break;
+    }
     return 0;
 }
