@@ -54,6 +54,10 @@ unsigned long mix(unsigned long a, unsigned long b, unsigned long c)
     return c;
 }
 
+void help(){
+    cout << "./kry -b length || ./kry -e E N M || ./kry -d D N C\n";
+}
+
 /**
  * Parse args
  */
@@ -79,6 +83,7 @@ tParams getOptions(int argc, char *argv[]) {
         params.type = DECYPHER;
     }
     else{
+        help();
         exit(1);
     }
     return params;
@@ -127,25 +132,21 @@ void generate(tParams params){
     gmp_printf ("private D:  %Zd\n", privateD);
     */
     
-    gmp_printf("0x%Zx 0x%Zx 0x%Zx 0x%Zx 0x%Zx",randoms.p, randoms.q, N, publicExponent, privateD);
+    gmp_printf("0x%Zx 0x%Zx 0x%Zx 0x%Zx 0x%Zx\n",randoms.p, randoms.q, N, publicExponent, privateD);
 }
 
 void cypher(tParams params){
     mpz_t cyphered; mpz_init(cyphered);
     Rsa* rsa = new Rsa();
     rsa->cypher(cyphered, params.message, params.publicExponent, params.N);
-    gmp_printf("0x%Zx",cyphered);
+    gmp_printf("0x%Zx\n",cyphered);
 }
 
 void decypher(tParams params){
     mpz_t message; mpz_init(message);
     Rsa* rsa = new Rsa();
     rsa->decypher(message, params.cyphered, params.privateD, params.N);
-    gmp_printf("0x%Zx",message);
-}
-
-void help(){
-    cout << "help";
+    gmp_printf("0x%Zx\n",message);
 }
 
 int main(int argc, char ** argv) {
