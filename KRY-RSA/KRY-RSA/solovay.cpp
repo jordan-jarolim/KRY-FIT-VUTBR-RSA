@@ -216,11 +216,11 @@ tRandoms Solovay::getPrimes(gmp_randstate_t rstate){
     /* Iter until you get prime p */
     while (myPrime == false){
         myPrime = this->testPrime(p);
-        oficPrime = mpz_probab_prime_p(p, ITERS);
+        /* oficPrime = mpz_probab_prime_p(p, ITERS);
         if ((myPrime > 0 && oficPrime == 0) || (myPrime == 0 && oficPrime > 0)){
             cout << "ERROR KAMO";
             exit(1);
-        }
+        }*/
         if (!myPrime){
             // add 2 because random numb is odd and prime number cannot be even
             mpz_add_ui(p, p, 2);
@@ -232,11 +232,11 @@ tRandoms Solovay::getPrimes(gmp_randstate_t rstate){
     /* Iter until you get prime q */
     while (myPrime == false){
         myPrime = this->testPrime(q);
-        oficPrime = mpz_probab_prime_p(q, ITERS);
+        /* oficPrime = mpz_probab_prime_p(q, ITERS);
         if ((myPrime > 0 && oficPrime == 0) || (myPrime == 0 && oficPrime > 0)){
             cout << "ERROR KAMO";
             exit(1);
-        }
+        }*/
         
         if (!myPrime){
             // add 2 because random numb is odd and prime number cannot be even

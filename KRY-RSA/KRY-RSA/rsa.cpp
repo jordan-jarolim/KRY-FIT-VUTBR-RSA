@@ -14,11 +14,16 @@
 
 using namespace std;
 
-
+/**
+ * Get N = p*q
+ */
 void Rsa::getN(mpz_t N, mpz_t p, mpz_t q){
     mpz_mul(N, p, q);
 }
 
+/**
+ * Get Phi=(p-1)*(q-1)
+ */
 void Rsa::getPhi(mpz_t phi, mpz_t p, mpz_t q){
     mpz_t pMinus; mpz_init(pMinus);
     mpz_t qMinus; mpz_init(qMinus);
@@ -27,6 +32,9 @@ void Rsa::getPhi(mpz_t phi, mpz_t p, mpz_t q){
     mpz_mul(phi, pMinus, qMinus);
 }
 
+/**
+ * e : gcd(e, phi) = 1 && e > 1 && e < phi
+ */
 void Rsa::getPublicExponent(mpz_t publicExponent, mpz_t phi, gmp_randstate_t rstate){
     bool isOk = false;
     char* str;
@@ -66,14 +74,17 @@ void Rsa::getPublicExponent(mpz_t publicExponent, mpz_t phi, gmp_randstate_t rst
             isOk = true;
         }
         
-        mpz_gcd(helper, phi, publicExponent);
+        /* mpz_gcd(helper, phi, publicExponent);
         if ((isOk && mpz_cmp_ui(helper, 1) != 0) || (!isOk && mpz_cmp_ui(helper, 1) == 0)){
             cout << "ERROR KAMO";
             exit(1);
-        }
+        }*/
     }
 }
 
+/**
+ * euclid to find gcd
+ */
 void Rsa::euclid(mpz_t u, mpz_t w){
     mpz_t r; mpz_init(r);
     while(mpz_cmp_ui(w, 0) != 0){
@@ -97,7 +108,6 @@ void Rsa::euclid(mpz_t u, mpz_t w){
  * output "greatest common divisor:", old_r
  * output "quotients by the gcd:", (t, s)
  */
-
 void Rsa::extendedEuclid(mpz_t result, mpz_t a, mpz_t b){
     mpz_t s; mpz_init_set_ui(s, 0);
     mpz_t t; mpz_init_set_ui(t, 1);
@@ -142,9 +152,18 @@ void Rsa::extendedEuclid(mpz_t result, mpz_t a, mpz_t b){
 }
 
 
+/**
+ * RSA cypher
+ */
 void Rsa::cypher(mpz_t cyphered, mpz_t message, mpz_t publicExponent, mpz_t N){
-    mpz_pow(result, message, publicExponent);
-    mpz_mod(result, result, N);
+    mpz_powm(cyphered, message, publicExponent, N);
+}
+
+/**
+ * RSA decypher
+ */
+void Rsa::decypher(mpz_t message, mpz_t cyphered, mpz_t privateD, mpz_t N){
+    mpz_powm(message, cyphered, privateD, N);
 }
 
 

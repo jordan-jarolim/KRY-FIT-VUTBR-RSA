@@ -66,11 +66,20 @@ tParams getOptions(int argc, char *argv[]) {
         params.length = atoi(argv[2]);
         params.type = GENERATE;
     }
-    if (!strcmp(argv[1], "-e")){
+    else if (!strcmp(argv[1], "-e")){
         mpz_set_str(params.publicExponent, argv[2], 0);
         mpz_set_str(params.N, argv[3], 0);
         mpz_set_str(params.message, argv[4], 0);
         params.type = CYPHER;
+    }
+    else if (!strcmp(argv[1], "-d")){
+        mpz_set_str(params.privateD, argv[2], 0);
+        mpz_set_str(params.N, argv[3], 0);
+        mpz_set_str(params.cyphered, argv[4], 0);
+        params.type = DECYPHER;
+    }
+    else{
+        exit(1);
     }
     return params;
 }
@@ -109,12 +118,14 @@ void generate(tParams params){
     rsa->getPublicExponent(publicExponent, phi, rstate);
     rsa->extendedEuclid(privateD, publicExponent, phi);
     
+    /*
     gmp_printf ("p: %Zd\n", randoms.p);
     gmp_printf ("q: %Zd\n", randoms.q);
     gmp_printf ("N: %Zd\n", N);
     gmp_printf ("Phi:  %Zd\n", phi);
     gmp_printf ("public exp:  %Zd\n", publicExponent);
     gmp_printf ("private D:  %Zd\n", privateD);
+    */
     
     gmp_printf("0x%Zx 0x%Zx 0x%Zx 0x%Zx 0x%Zx",randoms.p, randoms.q, N, publicExponent, privateD);
 }
@@ -127,9 +138,14 @@ void cypher(tParams params){
 }
 
 void decypher(tParams params){
+    mpz_t message; mpz_init(message);
+    Rsa* rsa = new Rsa();
+    rsa->decypher(message, params.cyphered, params.privateD, params.N);
+    gmp_printf("0x%Zx",message);
 }
 
 void help(){
+    cout << "help";
 }
 
 int main(int argc, char ** argv) {

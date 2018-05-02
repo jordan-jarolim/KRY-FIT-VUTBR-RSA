@@ -29,6 +29,5 @@ private:
     void getRandom(mpz_t p, mpz_t q, gmp_randstate_t rstate);
     bool testPrime(mpz_t prime);
     int jacob(mpz_t a, mpz_t n);
-    // bool solovoyCombined(ll p, int iteration);
 };
 #endif /* solovay_hpp */

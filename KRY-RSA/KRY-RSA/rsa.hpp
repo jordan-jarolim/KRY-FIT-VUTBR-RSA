@@ -20,6 +20,7 @@ public:
     void getPublicExponent(mpz_t publicExponent, mpz_t phi, gmp_randstate_t rstate);
     void extendedEuclid(mpz_t result, mpz_t a, mpz_t b);
     void cypher(mpz_t cyphered, mpz_t message, mpz_t publicExponent, mpz_t N);
+    void decypher(mpz_t message, mpz_t cyphered, mpz_t privateD, mpz_t N);
 
 private:
     void euclid(mpz_t u, mpz_t w);
