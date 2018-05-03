@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6D269F5E2094D9D700149084 /* solovay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6D269F5C2094D9D700149084 /* solovay.cpp */; };
+		6D269F602094E3BA00149084 /* makefile in Sources */ = {isa = PBXBuildFile; fileRef = 6D269F5F2094E3BA00149084 /* makefile */; };
+		6D269F6320979ADF00149084 /* rsa.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6D269F6120979ADF00149084 /* rsa.cpp */; };
 		A98E440F208A1B3B00B9630A /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A98E440E208A1B3B00B9630A /* main.cpp */; };
 /* End PBXBuildFile section */
 
@@ -23,6 +26,11 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		6D269F5C2094D9D700149084 /* solovay.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = solovay.cpp; sourceTree = "<group>"; };
+		6D269F5D2094D9D700149084 /* solovay.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = solovay.hpp; sourceTree = "<group>"; };
+		6D269F5F2094E3BA00149084 /* makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = makefile; sourceTree = "<group>"; };
+		6D269F6120979ADF00149084 /* rsa.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = rsa.cpp; sourceTree = "<group>"; };
+		6D269F6220979ADF00149084 /* rsa.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = rsa.hpp; sourceTree = "<group>"; };
 		A98E440B208A1B3B00B9630A /* KRY-RSA */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "KRY-RSA"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A98E440E208A1B3B00B9630A /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -57,7 +65,12 @@
 		A98E440D208A1B3B00B9630A /* KRY-RSA */ = {
 			isa = PBXGroup;
 			children = (
+				6D269F5F2094E3BA00149084 /* makefile */,
 				A98E440E208A1B3B00B9630A /* main.cpp */,
+				6D269F6120979ADF00149084 /* rsa.cpp */,
+				6D269F6220979ADF00149084 /* rsa.hpp */,
+				6D269F5C2094D9D700149084 /* solovay.cpp */,
+				6D269F5D2094D9D700149084 /* solovay.hpp */,
 			);
 			path = "KRY-RSA";
 			sourceTree = "<group>";
@@ -120,6 +133,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				A98E440F208A1B3B00B9630A /* main.cpp in Sources */,
+				6D269F5E2094D9D700149084 /* solovay.cpp in Sources */,
+				6D269F6320979ADF00149084 /* rsa.cpp in Sources */,
+				6D269F602094E3BA00149084 /* makefile in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
