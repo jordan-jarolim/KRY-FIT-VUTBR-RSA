@@ -33,6 +33,10 @@ void Solovay::getRandom(mpz_t p, mpz_t q, gmp_randstate_t rstate){
     mpz_urandomb(p, rstate, opLength);
     mpz_urandomb(q, rstate, this->length - opLength);
     
+    while(mpz_cmp(p, q) == 0){
+        mpz_urandomb(q, rstate, this->length - opLength);
+    }
+    
     // Odds
     mpz_setbit(p, 0);
     mpz_setbit(q, 0);
