@@ -21,6 +21,7 @@
 #define GENERATE 0
 #define CYPHER 1
 #define DECYPHER 2
+#define BREAK 3
 
 using namespace std;
 
@@ -83,7 +84,8 @@ tParams getOptions(int argc, char *argv[]) {
         params.type = DECYPHER;
     }
     else if (!strcmp(argv[1], "-b")){
-        exit(0);
+        mpz_set_str(params.N, argv[2], 0);
+        params.type = BREAK;
     }
     else{
         help();
@@ -126,16 +128,11 @@ void generate(tParams params){
     rsa->getPublicExponent(publicExponent, phi, rstate);
     rsa->extendedEuclid(privateD, publicExponent, phi);
     
-    /*
-    gmp_printf ("p: %Zd\n", randoms.p);
-    gmp_printf ("q: %Zd\n", randoms.q);
-    gmp_printf ("N: %Zd\n", N);
-    gmp_printf ("Phi:  %Zd\n", phi);
-    gmp_printf ("public exp:  %Zd\n", publicExponent);
-    gmp_printf ("private D:  %Zd\n", privateD);
-    */
-    
     gmp_printf("0x%Zx 0x%Zx 0x%Zx 0x%Zx 0x%Zx\n",randoms.p, randoms.q, N, publicExponent, privateD);
+    mpz_clear(N);
+    mpz_clear(privateD);
+    mpz_clear(phi);
+    mpz_clear(publicExponent);
 }
 
 /**
@@ -146,6 +143,10 @@ void cypher(tParams params){
     Rsa* rsa = new Rsa();
     rsa->cypher(cyphered, params.message, params.publicExponent, params.N);
     gmp_printf("0x%Zx\n",cyphered);
+    mpz_clear(cyphered);
+    mpz_clear(params.message);
+    mpz_clear(params.N);
+    mpz_clear(params.publicExponent);
 }
 
 /**
@@ -156,6 +157,28 @@ void decypher(tParams params){
     Rsa* rsa = new Rsa();
     rsa->decypher(message, params.cyphered, params.privateD, params.N);
     gmp_printf("0x%Zx\n",message);
+    mpz_clear(message);
+    mpz_clear(params.cyphered);
+    mpz_clear(params.N);
+    mpz_clear(params.privateD);
+}
+
+/**
+ * Break RSA
+ */
+void breakIt (tParams params){
+    /* Init rand */
+    unsigned long seed = mix(clock(), time(NULL), getpid());
+    gmp_randstate_t rstate;
+    gmp_randinit_mt(rstate);
+    gmp_randseed_ui(rstate, seed);
+    mpz_t p; mpz_init(p);
+    
+    Rsa* rsa = new Rsa();
+    rsa->breakIt(p, params.N, rstate);
+    gmp_printf("0x%Zx\n",p);
+    mpz_clear(p);
+    mpz_clear(params.N);
 }
 
 /**
@@ -173,6 +196,8 @@ int main(int argc, char ** argv) {
         case DECYPHER:
             decypher(params);
             break;
+        case BREAK:
+            breakIt(params);
         default:
             exit(0);
             break;

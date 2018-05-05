@@ -10,6 +10,8 @@
 #include <iostream>
 #include <string.h>
 
+#define BREAK_ITERATIONS 1000000
+
 using namespace std;
 
 /**
@@ -28,6 +30,8 @@ void Rsa::getPhi(mpz_t phi, mpz_t p, mpz_t q){
     mpz_sub_ui(pMinus, p, 1);
     mpz_sub_ui(qMinus, q, 1);
     mpz_mul(phi, pMinus, qMinus);
+    mpz_clear(pMinus);
+    mpz_clear(qMinus);
 }
 
 /**
@@ -72,6 +76,9 @@ void Rsa::getPublicExponent(mpz_t publicExponent, mpz_t phi, gmp_randstate_t rst
             isOk = true;
         }
     }
+    mpz_clear(testExp);
+    mpz_clear(testPhi);
+    mpz_clear(helper);
 }
 
 /**
@@ -84,6 +91,34 @@ void Rsa::euclid(mpz_t u, mpz_t w){
         mpz_set(u, w);
         mpz_set(w, r);
     }
+    mpz_clear(r);
+}
+
+/**
+ * modular pow
+ */
+void Rsa::modPow(mpz_t result, mpz_t base, mpz_t exponent, mpz_t mod){
+    mpz_t x; mpz_init_set_ui(x, 1);
+    mpz_t y; mpz_init_set(y, base);
+    mpz_t helper; mpz_init(helper);
+    mpz_t expo; mpz_init_set(expo, exponent);
+    
+    while(mpz_cmp_ui(expo, 0) > 0)
+    {
+        mpz_mod_ui(helper, expo, 2);
+        if (mpz_cmp_ui(helper, 1) == 0){
+            mpz_mul(helper, x, y);
+            mpz_mod(x, helper, mod);
+        }
+        mpz_mul(helper, y, y);
+        mpz_mod(y, helper, mod);
+        mpz_div_ui(expo, expo, 2);
+    }
+    mpz_mod(result, x, mod);
+    mpz_clear(x);
+    mpz_clear(y);
+    mpz_clear(helper);
+    mpz_clear(expo);
 }
 
 /**
@@ -141,6 +176,15 @@ void Rsa::extendedEuclid(mpz_t result, mpz_t a, mpz_t b){
     if (mpz_cmp_ui(result, 0) < 0){
         mpz_add(result, result, b);
     }
+    mpz_clear(s);
+    mpz_clear(r);
+    mpz_clear(t);
+    mpz_clear(old_S);
+    mpz_clear(old_R);
+    mpz_clear(old_T);
+    mpz_clear(quotient);
+    mpz_clear(helper1);
+    mpz_clear(helper2);
 }
 
 
@@ -156,6 +200,108 @@ void Rsa::cypher(mpz_t cyphered, mpz_t message, mpz_t publicExponent, mpz_t N){
  */
 void Rsa::decypher(mpz_t message, mpz_t cyphered, mpz_t privateD, mpz_t N){
     mpz_powm(message, cyphered, privateD, N);
+}
+
+/**
+ * RSA breaker
+ */
+void Rsa::breakIt(mpz_t p, mpz_t N, gmp_randstate_t rstate){
+    bool found = false;
+    int counter = 0;
+    mpz_t result; mpz_init(result);
+    mpz_set_ui(p, 2);
+    
+    // is even?
+    mpz_mod(result, N, p);
+    if (mpz_cmp_ui(result, 0) == 0){
+        return;
+    }
+    
+    // set odd
+    mpz_set_ui(p, 1);
+    
+    /* Try brute force */
+    while (!found && counter < BREAK_ITERATIONS){
+        counter++;
+
+        mpz_add_ui(p, p, 2);
+        mpz_mod(result, N, p);
+        if (mpz_cmp_ui(result, 0) == 0){
+            found = true;
+        }
+    }
+    
+    mpz_t x; mpz_init(x);
+    mpz_t y; mpz_init(y);
+    mpz_t c; mpz_init(c);
+    mpz_t d; mpz_init(d);
+    mpz_t helper; mpz_init(helper);
+    mpz_t helper2; mpz_init(helper2);
+
+    /* Pollard's Rho */
+    while (!found){
+        /* get random x 2 - N */
+        mpz_sub_ui(helper, N, 2);
+        mpz_urandomm(x, rstate, helper);
+        mpz_add_ui(x, x, 2);
+        mpz_set(y, x);
+
+        /* get random c 1 - N */
+        mpz_sub_ui(helper, N, 1);
+        mpz_urandomm(c, rstate, helper);
+        mpz_add_ui(c, c, 1);
+
+        /* init candidate */
+        mpz_set_ui(d, 1);
+        
+        /* GCD is 1 */
+        while (mpz_cmp_ui(d, 1) == 0)
+        {
+            /* Tortoise */
+            mpz_set_ui(helper, 2);
+            modPow(helper2, x, helper, N);
+            mpz_add(x, helper2, c);
+            mpz_add(x, x, N);
+            mpz_mod(x, x, N);
+
+            /* Hare Move */
+            modPow(helper2, y, helper, N);
+            mpz_add(y, helper2, c);
+            mpz_add(y, y, N);
+            mpz_mod(y, y, N);
+            
+            /* Hare Move */
+            modPow(helper2, y, helper, N);
+            mpz_add(y, helper2, c);
+            mpz_add(y, y, N);
+            mpz_mod(y, y, N);
+
+            /* abs x-y */
+            mpz_sub(helper, x, y);
+            if (mpz_cmp_ui(helper, 0) < 0){
+                mpz_neg(helper, helper);
+            }
+            
+            /* get gcd */
+            mpz_set(helper2, N);
+            this->euclid(helper, helper2);
+
+            /* set value */
+            mpz_set(d, helper);
+            
+            if (mpz_cmp(d, N) != 0){
+                found = true;
+            }
+        }
+        mpz_set(p, d);
+    }
+    
+    mpz_clear(x);
+    mpz_clear(y);
+    mpz_clear(c);
+    mpz_clear(d);
+    mpz_clear(helper);
+    mpz_clear(helper2);
 }
 
 

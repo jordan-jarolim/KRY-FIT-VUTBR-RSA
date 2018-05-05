@@ -131,6 +131,12 @@ bool Solovay::testPrime(mpz_t prime){
             return false;
         }
     }
+    mpz_clear(veryRandomNumber);
+    mpz_clear(leftCongruent);
+    mpz_clear(rightCongruent);
+    mpz_clear(a);
+    mpz_clear(helper);
+
     return true;
 }
 
@@ -199,6 +205,8 @@ int Solovay::jacob(mpz_t a_in, mpz_t n_in)
     if (mpz_cmp_ui(n, 1) == 0){
         return jacobValue;
     }
+    mpz_clear(helper);
+    mpz_clear(helper2);
     return 0;
 }
 
@@ -241,6 +249,9 @@ tRandoms Solovay::getPrimes(gmp_randstate_t rstate){
     mpz_init(randoms.q);
     mpz_set(randoms.p, p);
     mpz_set(randoms.q, q);
+    mpz_clear(p);
+    mpz_clear(q);
+
     return randoms;
 };
 
